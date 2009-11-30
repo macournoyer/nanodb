@@ -1,1 +1,4 @@
 nanodb
+vendor/tokyocabinet/*
+*.o
+*.ndb
