@@ -5,6 +5,8 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 
+#include "nd.h"
+
 #define READ_SIZE  1024
 
 int fd;
@@ -19,6 +21,7 @@ struct nd_connection {
   int fd;
   ev_io read_watcher;
   ev_io write_watcher;
+  struct nd_parser parser;
 };
 
 void nd_connection_close(struct nd_connection *c) {
@@ -45,15 +48,27 @@ static void readable_cb(EV_P_ struct ev_io *watcher, int revents) {
     return;
   }
   
-  nd_parse(buf, received);
+  nd_parse(&c->parser, buf, received);
   
   // Close after one request for now
   nd_connection_close(c);
 }
 
+static void parsed_cb(void *data) {
+  struct nd_connection *c = (struct nd_connection*)data;
+  switch(c->parser.method) {
+    case ND_GET:
+      printf("get %s[%d]: %s\n", c->parser.key, c->parser.key_len, nd_get(c->parser.key, c->parser.key_len));
+      break;
+    case ND_PUT:
+      // TODO
+      break;
+  }
+}
+
 void nd_new_connection(int cfd) {
-  puts("Got new connection");
   struct nd_connection *c = (struct nd_connection*)malloc(sizeof(struct nd_connection));
+  nd_parser_init(&c->parser, parsed_cb, c);
   c->fd = cfd;
   c->read_watcher.data = c->write_watcher.data = c;
   

@@ -5,7 +5,7 @@ LIBS = vendor/tokyocabinet/libtokyocabinet.a -lz -lbz2
 
 SRC = src/store.c \
       src/server.c \
-      src/interp.c \
+      src/parser.c \
       src/main.c
 OBJ = ${SRC:.c=.o}
 OBJ_MIN = vm/tr.o
@@ -19,6 +19,9 @@ all: nanodb
 nanodb: ${OBJ}
 	@echo " link nanodb"
 	@${CC} ${CFLAGS} ${OBJ} ${LIBS} -o nanodb
+
+src/parser.c: src/parser.rl
+	ragel $< -o $@
 
 clean:
 	$(RM) src/*.o

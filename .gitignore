@@ -1,8 +1,9 @@
 *.o
 *.ndb
 
+src/parser.c
+
 nanodb
 
 vendor/tokyocabinet/*
-vendor/yajl/*
 vendor/libev/*
