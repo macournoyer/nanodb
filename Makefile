@@ -1,9 +1,10 @@
 CC = gcc
-CFLAGS = -std=c99 -Wall -Wextra -D_XOPEN_SOURCE -DDEBUG -g -O2 -funroll-loops
-INCS = -Isrc -Ivendor/tokyocabinet
+CFLAGS = -DDEBUG -g -O2
+INCS = -Isrc -Ivendor/tokyocabinet -Ivendor/libev
 LIBS = vendor/tokyocabinet/libtokyocabinet.a -lz -lbz2
 
 SRC = src/store.c \
+      src/server.c \
       src/main.c
 OBJ = ${SRC:.c=.o}
 OBJ_MIN = vm/tr.o
