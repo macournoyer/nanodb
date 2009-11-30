@@ -5,3 +5,4 @@ nanodb
 
 vendor/tokyocabinet/*
 vendor/yajl/*
+vendor/libev/*

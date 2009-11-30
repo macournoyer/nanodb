@@ -12,4 +12,9 @@ nanodb is a small database engine based on:
     
     echo '{"get":"hi"}' | nc localhost 5000
 
+## Building
+
+For now, you'll need to build all the stuff manually in vendor.
+I'll automate this someday, but for now... good luck!
+
 (c) macournoyer
