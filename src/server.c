@@ -21,6 +21,14 @@ struct nd_connection {
   ev_io write_watcher;
 };
 
+void nd_connection_close(struct nd_connection *c) {
+  ev_io_stop(loop, &c->read_watcher);
+  ev_io_stop(loop, &c->write_watcher);
+  close(c->fd);
+  shutdown(c->fd, SHUT_RDWR);
+  free(c);
+}
+
 static void readable_cb(EV_P_ struct ev_io *watcher, int revents) {
   char buf[READ_SIZE];
   struct nd_connection *c = (struct nd_connection*) watcher->data;
@@ -38,9 +46,12 @@ static void readable_cb(EV_P_ struct ev_io *watcher, int revents) {
   }
   
   printf("%s", buf);
+  
+  // Close after one request for now
+  nd_connection_close(c);
 }
 
-static void nd_new_connection(int cfd) {
+void nd_new_connection(int cfd) {
   puts("Got new connection");
   struct nd_connection *c = (struct nd_connection*)malloc(sizeof(struct nd_connection));
   c->fd = cfd;
@@ -51,9 +62,6 @@ static void nd_new_connection(int cfd) {
   
   /* start event watchers */
   ev_io_start(loop, &c->read_watcher);
-  
-  // close(cfd);
-  // shutdown(cfd, SHUT_RDWR);
 }
 
 
