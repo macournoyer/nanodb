@@ -2,11 +2,14 @@
 
 nanodb is a small database engine based on:
 
-* tokyo cabinet B+ tree for storage;
-* libev for networking and
-* ragel for parsing.
+* tokyo cabinet B+ tree, for storage;
+* libev, for networking and
+* ragel, for parsing.
 
-## Usage
+It's mostly will be a key-value store for now, but I hope to make it look
+more like a real db someday.
+
+## Try it (not yet working...)
 
     nanodb yourdb.ndb 5000
     
@@ -20,7 +23,7 @@ nanodb is a small database engine based on:
 
 ## Building
 
-For now, you'll need to build all the stuff manually in vendor.
+For now, you'll need to build tokyo cabinet in vendor and install ragel.
 I'll automate this someday, but for now... good luck!
 
 (c) macournoyer
