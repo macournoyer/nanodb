@@ -5,17 +5,59 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 
-int fd;
+#define READ_SIZE  1024
 
+int fd;
 struct ev_loop *loop;
 ev_io accept_watcher;
+ev_signal signal_watcher;
 
-static void new_connection(int cfd, struct sockaddr_in remote_addr) {
-  puts("got new connection");
 
-  close(cfd);
-  shutdown(cfd, SHUT_RDWR);
+/** Connections **/
+
+struct nd_connection {
+  int fd;
+  ev_io read_watcher;
+  ev_io write_watcher;
+};
+
+static void readable_cb(EV_P_ struct ev_io *watcher, int revents) {
+  char buf[READ_SIZE];
+  struct nd_connection *c = (struct nd_connection*) watcher->data;
+  
+  size_t received = recv(c->fd, buf, READ_SIZE, 0);
+  
+  if (received == -1) {
+    /* error, TODO close connection */
+    return;
+  }
+  
+  if (received == 0) {
+    /* received 0 byte, read again next loop */
+    return;
+  }
+  
+  printf("%s", buf);
 }
+
+static void nd_new_connection(int cfd) {
+  puts("Got new connection");
+  struct nd_connection *c = (struct nd_connection*)malloc(sizeof(struct nd_connection));
+  c->fd = cfd;
+  c->read_watcher.data = c->write_watcher.data = c;
+  
+  ev_io_init(&c->read_watcher, readable_cb, c->fd, EV_READ);
+  // ev_io_init(&c->write_watcher, writable_cb, c->fd, EV_WRITE);
+  
+  /* start event watchers */
+  ev_io_start(loop, &c->read_watcher);
+  
+  // close(cfd);
+  // shutdown(cfd, SHUT_RDWR);
+}
+
+
+/** Server **/
 
 static void accept_cb(EV_P_ struct ev_io *watcher, int revents) {
   struct sockaddr_in remote_addr;
@@ -35,10 +77,16 @@ static void accept_cb(EV_P_ struct ev_io *watcher, int revents) {
     return;
   }
   
-  new_connection(cfd, remote_addr);
+  nd_new_connection(cfd);
 }
 
-void nd_server_bind(int port) {
+static void sigint_cb(struct ev_loop *loop, ev_signal *w, int revents) {
+  puts("Got INT signal, stopping ...");
+  ev_unloop (loop, EVUNLOOP_ALL);
+}
+
+
+void nd_bind(int port) {
   int ret;
   int sock_flags = 1;
   struct sockaddr_in local_addr;
@@ -69,12 +117,18 @@ void nd_server_bind(int port) {
   ev_io_start(loop, &accept_watcher);
 }
 
+void nd_install_signals() {
+  ev_signal_init(&signal_watcher, sigint_cb, SIGINT);
+  ev_signal_start(loop, &signal_watcher);
+}
+
 void nd_server_start(int port) {
   loop = ev_default_loop(0);
   
-  nd_server_bind(port);
+  nd_install_signals();
+  nd_bind(port);
   
-  ev_loop(loop, EVLOOP_ONESHOT);
+  ev_loop(loop, 0);
 }
 
 void nd_server_stop() {
