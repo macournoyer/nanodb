@@ -5,6 +5,7 @@ LIBS = vendor/tokyocabinet/libtokyocabinet.a -lz -lbz2
 
 SRC = src/store.c \
       src/server.c \
+      src/interp.c \
       src/main.c
 OBJ = ${SRC:.c=.o}
 OBJ_MIN = vm/tr.o

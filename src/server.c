@@ -45,7 +45,7 @@ static void readable_cb(EV_P_ struct ev_io *watcher, int revents) {
     return;
   }
   
-  printf("%s", buf);
+  nd_parse(buf, received);
   
   // Close after one request for now
   nd_connection_close(c);

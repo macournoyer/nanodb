@@ -8,3 +8,5 @@ char *nd_get(const char *kbuf, int ksiz);
 
 void nd_server_start(int port);
 void nd_server_stop();
+
+void nd_parse(char *buf, int size);
