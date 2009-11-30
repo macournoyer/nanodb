@@ -1,4 +1,7 @@
-nanodb
-vendor/tokyocabinet/*
 *.o
 *.ndb
+
+nanodb
+
+vendor/tokyocabinet/*
+vendor/yajl/*
